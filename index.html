@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Piano Diatónico - 1 Octava</title>
+    <title>Piano Diatónico - Flecha Negra Centrada</title>
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            /* Evita la selección de texto o el menú contextual al mantener pulsado en móviles */
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             user-select: none;
@@ -20,30 +19,33 @@
             display: flex;
             height: 100vh;
             width: 100vw;
-            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
-            overflow: hidden; /* Fundamental para evitar scroll */
-            overscroll-behavior: none; /* Evita el "rebote" del navegador en móviles */
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            overscroll-behavior: none;
         }
 
         #piano-container {
             display: flex;
             width: 100%;
-            height: 100%; /* Ocupa el 100% de la pantalla */
+            height: 100%;
             touch-action: none; 
         }
 
         .key {
             flex: 1; 
             display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            padding-bottom: 40px; /* Un poco más de espacio abajo al ser teclas más grandes */
-            font-size: 2.5rem; /* Letra más grande para que se vea bien la flecha */
+            flex-direction: column;
+            align-items: center;       /* Centra horizontalmente */
+            justify-content: flex-end; /* Manda el contenido (la letra) hacia abajo */
+            padding-bottom: 40px;      /* Espacio desde el borde inferior */
+            font-size: 3rem; 
             font-weight: bold;
-            color: rgba(0, 0, 0, 0.6);
+            color: #000;
+            text-shadow: 2px 2px 4px rgba(255,255,255,0.7);
             cursor: pointer;
             border-right: 1px solid rgba(255,255,255,0.4);
             transition: filter 0.1s ease;
+            position: relative;        /* Necesario para posicionar la flecha de forma independiente */
         }
 
         .key:last-child {
@@ -53,6 +55,18 @@
         .key.active {
             filter: brightness(0.7);
         }
+
+        /* Estilo específico para la flecha centrada en la tecla */
+        .arrow {
+            position: absolute;
+            top: 50%;                  /* 50% desde arriba */
+            left: 50%;                 /* 50% desde la izquierda */
+            transform: translate(-50%, -50%); /* Ajuste fino para centrarla exactamente */
+            font-size: 4rem;           /* Flecha un poco más grande para que destaque */
+            color: #000;               /* Flecha negra sólida */
+            pointer-events: none;      /* Evita que la flecha interfiera con los toques */
+        }
+
     </style>
 </head>
 <body>
@@ -61,7 +75,6 @@
         </div>
 
     <script>
-        // Escala diatónica de 1 octava (C4 a C5) con flecha en la última nota
         const notes = [
             { name: "C",  freq: 261.63, color: "#FF4545" },
             { name: "D",  freq: 293.66, color: "#FF8C00" },
@@ -70,7 +83,7 @@
             { name: "G",  freq: 392.00, color: "#00C853" },
             { name: "A",  freq: 440.00, color: "#2962FF" },
             { name: "H",  freq: 493.88, color: "#FF4081" },
-            { name: "C↑", freq: 523.25, color: "#FF4545" } 
+            { name: "C",  freq: 523.25, color: "#FF4545", arrow: true } 
         ];
 
         const container = document.getElementById('piano-container');
@@ -128,7 +141,23 @@
             keyDiv.className = 'key';
             keyDiv.id = keyId;
             keyDiv.style.backgroundColor = note.color;
-            keyDiv.textContent = note.name;
+
+            // Si la nota tiene la propiedad "arrow", dibujamos la flecha centrada y la letra abajo
+            if (note.arrow) {
+                // Creamos la flecha
+                const arrowSpan = document.createElement('span');
+                arrowSpan.className = 'arrow';
+                arrowSpan.textContent = "↑";
+                keyDiv.appendChild(arrowSpan);
+
+                // Creamos la letra de la nota (que irá abajo gracias al flex-end)
+                const noteSpan = document.createElement('span');
+                noteSpan.textContent = note.name;
+                keyDiv.appendChild(noteSpan);
+            } else {
+                // Si no lleva flecha, simplemente ponemos la letra de la nota
+                keyDiv.textContent = note.name;
+            }
             
             const startPress = (e) => {
                 e.preventDefault(); 
