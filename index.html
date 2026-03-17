@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Piano Diatónico de Colores</title>
+    <title>Piano Diatónico - 1 Octava</title>
     <style>
         * {
             box-sizing: border-box;
@@ -37,12 +37,12 @@
             display: flex;
             align-items: flex-end;
             justify-content: center;
-            padding-bottom: 30px; /* Más espacio abajo para los dedos */
-            font-size: 1.8rem;
+            padding-bottom: 40px; /* Un poco más de espacio abajo al ser teclas más grandes */
+            font-size: 2.5rem; /* Letra más grande para que se vea bien la flecha */
             font-weight: bold;
             color: rgba(0, 0, 0, 0.6);
             cursor: pointer;
-            border-right: 1px solid rgba(255,255,255,0.3);
+            border-right: 1px solid rgba(255,255,255,0.4);
             transition: filter 0.1s ease;
         }
 
@@ -61,6 +61,7 @@
         </div>
 
     <script>
+        // Escala diatónica de 1 octava (C4 a C5) con flecha en la última nota
         const notes = [
             { name: "C",  freq: 261.63, color: "#FF4545" },
             { name: "D",  freq: 293.66, color: "#FF8C00" },
@@ -69,14 +70,7 @@
             { name: "G",  freq: 392.00, color: "#00C853" },
             { name: "A",  freq: 440.00, color: "#2962FF" },
             { name: "H",  freq: 493.88, color: "#FF4081" },
-            { name: "C'", freq: 523.25, color: "#FF4545" },
-            { name: "D'", freq: 587.33, color: "#FF8C00" },
-            { name: "E'", freq: 659.25, color: "#FFD700" },
-            { name: "F'", freq: 698.46, color: "#98FB98" },
-            { name: "G'", freq: 783.99, color: "#00C853" },
-            { name: "A'", freq: 880.00, color: "#2962FF" },
-            { name: "H'", freq: 987.77, color: "#FF4081" },
-            { name: "C''",freq: 1046.50, color:"#FF4545" } 
+            { name: "C↑", freq: 523.25, color: "#FF4545" } 
         ];
 
         const container = document.getElementById('piano-container');
