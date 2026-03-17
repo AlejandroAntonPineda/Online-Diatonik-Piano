@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Piano Diatónico de Colores</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            /* Evita la selección de texto o el menú contextual al mantener pulsado en móviles */
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            background-color: #fdf6cc;
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            overflow: hidden; /* Fundamental para evitar scroll */
+            overscroll-behavior: none; /* Evita el "rebote" del navegador en móviles */
+        }
+
+        #piano-container {
+            display: flex;
+            width: 100%;
+            height: 100%; /* Ocupa el 100% de la pantalla */
+            touch-action: none; 
+        }
+
+        .key {
+            flex: 1; 
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 30px; /* Más espacio abajo para los dedos */
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: rgba(0, 0, 0, 0.6);
+            cursor: pointer;
+            border-right: 1px solid rgba(255,255,255,0.3);
+            transition: filter 0.1s ease;
+        }
+
+        .key:last-child {
+            border-right: none;
+        }
+
+        .key.active {
+            filter: brightness(0.7);
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="piano-container">
+        </div>
+
+    <script>
+        const notes = [
+            { name: "C",  freq: 261.63, color: "#FF4545" },
+            { name: "D",  freq: 293.66, color: "#FF8C00" },
+            { name: "E",  freq: 329.63, color: "#FFD700" },
+            { name: "F",  freq: 349.23, color: "#98FB98" },
+            { name: "G",  freq: 392.00, color: "#00C853" },
+            { name: "A",  freq: 440.00, color: "#2962FF" },
+            { name: "H",  freq: 493.88, color: "#FF4081" },
+            { name: "C'", freq: 523.25, color: "#FF4545" },
+            { name: "D'", freq: 587.33, color: "#FF8C00" },
+            { name: "E'", freq: 659.25, color: "#FFD700" },
+            { name: "F'", freq: 698.46, color: "#98FB98" },
+            { name: "G'", freq: 783.99, color: "#00C853" },
+            { name: "A'", freq: 880.00, color: "#2962FF" },
+            { name: "H'", freq: 987.77, color: "#FF4081" },
+            { name: "C''",freq: 1046.50, color:"#FF4545" } 
+        ];
+
+        const container = document.getElementById('piano-container');
+        let audioCtx;
+        const activeOscillators = {};
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playNote(freq, keyId) {
+            initAudio();
+            if (activeOscillators[keyId]) return;
+
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            osc.type = 'triangle';
+            osc.frequency.value = freq;
+
+            const now = audioCtx.currentTime;
+            gainNode.gain.setValueAtTime(0, now);
+            gainNode.gain.linearRampToValueAtTime(1, now + 0.02);
+            gainNode.gain.exponentialRampToValueAtTime(0.5, now + 1.5);
+
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            osc.start();
+
+            activeOscillators[keyId] = { osc, gainNode };
+        }
+
+        function stopNote(keyId) {
+            const activeNote = activeOscillators[keyId];
+            if (activeNote) {
+                const now = audioCtx.currentTime;
+                const gainNode = activeNote.gainNode;
+                const osc = activeNote.osc;
+
+                gainNode.gain.cancelScheduledValues(now);
+                gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.4); 
+                
+                osc.stop(now + 0.5);
+                delete activeOscillators[keyId];
+            }
+        }
+
+        notes.forEach((note, index) => {
+            const keyId = `key-${index}`;
+            const keyDiv = document.createElement('div');
+            
+            keyDiv.className = 'key';
+            keyDiv.id = keyId;
+            keyDiv.style.backgroundColor = note.color;
+            keyDiv.textContent = note.name;
+            
+            const startPress = (e) => {
+                e.preventDefault(); 
+                keyDiv.classList.add('active');
+                playNote(note.freq, keyId);
+            };
+
+            const endPress = (e) => {
+                e.preventDefault();
+                keyDiv.classList.remove('active');
+                stopNote(keyId);
+            };
+
+            keyDiv.addEventListener('mousedown', startPress);
+            keyDiv.addEventListener('mouseup', endPress);
+            keyDiv.addEventListener('mouseleave', endPress);
+
+            keyDiv.addEventListener('touchstart', startPress, { passive: false });
+            keyDiv.addEventListener('touchend', endPress, { passive: false });
+            keyDiv.addEventListener('touchcancel', endPress, { passive: false });
+
+            container.appendChild(keyDiv);
+        });
+    </script>
+</body>
+</html>
